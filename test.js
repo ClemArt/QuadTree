@@ -22,8 +22,23 @@ it('Should get SW', 'equal', 'SW', function(){
 	return leaf.getQuad([0.1, 0.75]);
 });
 
+it('Should had an object in the root of the tree', 'equal', 'truc', function(){
+	var tree = new QTree();
+	tree.add('truc', [0.3,0.12]);
+	return tree.root.content;
+});
+
 it('Should had an object in the NW quad of the tree', 'equal', 'truc', function(){
 	var tree = new QTree();
 	tree.add('truc', [0.3,0.12]);
+	tree.add('michel', [0.6, 0.12]);
 	return tree.root.NW.content;
+});
+
+it('Should had an object in the NE quad of the tree', 'equal', 'michel', function(){
+	var tree = new QTree();
+	tree.add('truc', [0.3,0.12]);
+	tree.add('michel', [0.6, 0.12]);
+	console.log(tree);
+	return tree.root.NE.content;
 });
