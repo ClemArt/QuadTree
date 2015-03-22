@@ -28,7 +28,6 @@ it('Should throw an error because too many depths', null, null, function(){
 			 
 		tree.add('trucMuche'+iii, x, y);
 	}
-	console.log(tree);
 });
 
 it('Should add many objects to subtrees', null, null, function(){
@@ -53,8 +52,7 @@ it('Should add many objects to tree and return an array of objects in a box', nu
 		tree.add('trucMuche'+iii, x, y);
 	}
 	
-	console.log(tree);
-	console.log(tree.find(50,50,450,450));
+	console.log(tree.find(150,50,300,150));
 });
 
 it('Should add many objects to tree and visit it', null, null, function(){
@@ -71,4 +69,22 @@ it('Should add many objects to tree and visit it', null, null, function(){
 		if(obj) console.log(obj+'  '+x+'  '+y);
 		return (x1 > y1 && x2>y2);
 	});
+});
+
+it('Should add many objects to subtrees and create intermediate objects', null, null, function(){
+	var tree = new QTree(0,0,500,500);
+	
+	for(iii=0; iii<2000; iii++){
+		var x = Math.random()*500,
+			 y = Math.random()*500,
+			 mass = Math.random()*10;
+			 
+		tree.add(mass, x, y, function(obj, X, Y){
+			var newobj = obj + mass;
+			var newX = X*obj/newobj + mass/newobj*X;
+			var newY = Y*obj/newobj + mass/newobj*Y;
+			return [newobj, newX, newY];
+		});
+	}
+	console.log(tree);
 });

@@ -68,27 +68,37 @@ QTree.prototype.find = function(x1, y1, x2, y2){
 };
 
 /* Adds an object with his position in the tree
+@param (optional) Function functor : a function to apply to each node passed through, takes the actual object in parameters, f(object, x, y),
+returns an array of [obj, x, y]
 @return Boolean : true if object is added
 */
-QTree.prototype.add = function(object, x, y){
+QTree.prototype.add = function(object, x, y, functor){
+	var functor = (typeof(functor) === 'function') ? functor : function(obj, X, Y){return [null, null, null];};
+	
 	//Add the object to the next tree if it exists
 	if(this.nodes.length > 0){
+		var data = functor.call(this, this.object, this.objX, this.objY);
+		this.object = data[0];
+		this.objX = data[1];
+		this.objY = data[2];
+		
 		var index = this.getIndex(x, y, x, y)[0]; // The index can only be one precise subtree (point object)
-		return this.nodes[index].add(object, x, y);
+		return this.nodes[index].add(object, x, y, functor);
 	}
 	//If the object is not empty
 	if(this.object){
 		this.divide();
 		//Push down the object
 		var index = this.getIndex(this.objX, this.objY, this.objX, this.objY);
-		this.nodes[index].add(this.object, this.objX, this.objY);
+		this.nodes[index].add(this.object, this.objX, this.objY, functor);
 		
-		this.object = null;
-		this.objX = null;
-		this.objY = null;
+		var data = functor.call(this, this.object, this.objX, this.objY);
+		this.object = data[0];
+		this.objX = data[1];
+		this.objY = data[2];
 		
 		var index = this.getIndex(x, y, x, y)[0];
-		return this.nodes[index].add(object, x, y);
+		return this.nodes[index].add(object, x, y, functor);
 	}
 	//Add the object to the curent node
 	this.object = object;
@@ -100,20 +110,25 @@ QTree.prototype.add = function(object, x, y){
 
 /* Divides a node in 4 sub-nodes */
 QTree.prototype.divide = function(){
-	var subx = (this.x1 + this.x2)/2;
-	var suby = (this.y1 + this.y2)/2;
-	
-	//TopLeft
-	this.nodes[0] = new QTree(this.x1, this.y1, subx, suby, this.maxDepth, this, this.depth+1);
-	
-	//TopRight
-	this.nodes[1] = new QTree(subx, this.y1, this.x2, suby, this.maxDepth, this, this.depth+1);
-	
-	//BotLeft
-	this.nodes[2] = new QTree(this.x1, suby, subx, this.y2, this.maxDepth, this, this.depth+1);
-	
-	//BotRight
-	this.nodes[3] = new QTree(subx, suby, this.x2, this.y2, this.maxDepth, this, this.depth+1);
+	if(this.depth < this.maxDepth){
+		var subx = (this.x1 + this.x2)/2;
+		var suby = (this.y1 + this.y2)/2;
+		
+		//TopLeft
+		this.nodes[0] = new QTree(this.x1, this.y1, subx, suby, this.maxDepth, this, this.depth+1);
+		
+		//TopRight
+		this.nodes[1] = new QTree(subx, this.y1, this.x2, suby, this.maxDepth, this, this.depth+1);
+		
+		//BotLeft
+		this.nodes[2] = new QTree(this.x1, suby, subx, this.y2, this.maxDepth, this, this.depth+1);
+		
+		//BotRight
+		this.nodes[3] = new QTree(subx, suby, this.x2, this.y2, this.maxDepth, this, this.depth+1);
+	}
+	else {
+		throw new Error('You dug too deep in the tree, there is no more space, consider increasing the maxDepth');
+	}
 };
 
 /* Gets the subtree index of a given bounding box
